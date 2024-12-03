@@ -4,13 +4,12 @@ import kong.unirest.HttpResponse;
 import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
 import org.example.dto.response.SearchResult;
-import org.example.dto.response.request.SearchRequest;
+import org.example.dto.request.SearchRequest;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
@@ -34,9 +33,12 @@ public class SearchController {
         StringBuilder queryBuilder = new StringBuilder(searchRequest.getOccupation());
         if (searchRequest.getCity() != null) queryBuilder.append(" in ").append(searchRequest.getCity());
         if (searchRequest.getCountry() != null) queryBuilder.append(" ").append(searchRequest.getCountry());
+        if (searchRequest.getFileType() != null) {
+            queryBuilder.append(" filetype:").append(searchRequest.getFileType());
+        }
         String query = queryBuilder.toString();
-
         List<SearchResult> results = new ArrayList<>();
+
         String googleSearchUrl = "https://www.googleapis.com/customsearch/v1";
 
         // Perform Google search using API
@@ -44,6 +46,7 @@ public class SearchController {
                 .queryString("key", apiKey)
                 .queryString("cx", cx)
                 .queryString("q", query)
+                .queryString("fileType", searchRequest.getFileType())
                 .asJson();
 
         if (response.getStatus() == 200) {
@@ -58,7 +61,7 @@ public class SearchController {
                 Set<String> emails = scrapeEmails(link);
 
                 // Add result to the list
-                results.add(new SearchResult(title, link, emails));
+//                results.add(new SearchResult(title, link));
             }
         }
 

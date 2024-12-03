@@ -8,13 +8,15 @@ import java.util.Set;
 @Setter
 @Getter
 public class SearchResult {
-    private String title;
-    private String url;
-    private Set<String> emails;
+    private String name;
+    private String email;
+    private String company;
+    private String location;
 
-    public SearchResult(String title, String url, Set<String> emails) {
-        this.title = title;
-        this.url = url;
-        this.emails = emails;
+    public SearchResult(String name, String email, String company, String location) {
+        this.name = name != null ? name : "N/A";
+        this.email = email != null ? email : "N/A";
+        this.company = company != null ? company : "N/A";
+        this.location = location != null ? location : "N/A";
     }
 }
