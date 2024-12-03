@@ -4,10 +4,12 @@ import kong.unirest.HttpResponse;
 import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
 import org.example.dto.response.SearchResult;
+import org.example.dto.response.request.SearchRequest;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,15 +28,12 @@ public class SearchController {
     private String cx;
 
     @GetMapping("/search")
-    public List<SearchResult> search(
-            @RequestParam String occupation,
-            @RequestParam(required = false) String city,
-            @RequestParam(required = false) String country) {
+    public List<SearchResult> search(@RequestBody SearchRequest searchRequest) {
 
         // Build search query
-        StringBuilder queryBuilder = new StringBuilder(occupation);
-        if (city != null) queryBuilder.append(" in ").append(city);
-        if (country != null) queryBuilder.append(" ").append(country);
+        StringBuilder queryBuilder = new StringBuilder(searchRequest.getOccupation());
+        if (searchRequest.getCity() != null) queryBuilder.append(" in ").append(searchRequest.getCity());
+        if (searchRequest.getCountry() != null) queryBuilder.append(" ").append(searchRequest.getCountry());
         String query = queryBuilder.toString();
 
         List<SearchResult> results = new ArrayList<>();
