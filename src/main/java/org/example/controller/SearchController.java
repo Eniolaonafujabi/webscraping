@@ -10,7 +10,6 @@ import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
@@ -30,7 +29,6 @@ public class SearchController {
     @GetMapping("/search")
     public List<SearchResult> search(@RequestBody SearchRequest searchRequest) {
 
-        // Build search query
         StringBuilder queryBuilder = new StringBuilder(searchRequest.getOccupation());
         if (searchRequest.getCity() != null) queryBuilder.append(" in ").append(searchRequest.getCity());
         if (searchRequest.getCountry() != null) queryBuilder.append(" ").append(searchRequest.getCountry());
@@ -39,7 +37,6 @@ public class SearchController {
         List<SearchResult> results = new ArrayList<>();
         String googleSearchUrl = "https://www.googleapis.com/customsearch/v1";
 
-        // Perform Google search using API
         HttpResponse<JsonNode> response = Unirest.get(googleSearchUrl)
                 .queryString("key", apiKey)
                 .queryString("cx", cx)
@@ -54,10 +51,9 @@ public class SearchController {
                 String title = item.getString("title");
                 String link = item.getString("link");
 
-                // Scrape emails from the link
                 Set<String> emails = scrapeEmails(link);
 
-                // Add result to the list
+
                 results.add(new SearchResult(title, link, emails));
             }
         }
@@ -71,7 +67,6 @@ public class SearchController {
             Document document = Jsoup.connect(url).get();
             String text = document.text();
 
-            // Regex for email extraction
             Pattern emailPattern = Pattern.compile(
                     "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}");
             Matcher matcher = emailPattern.matcher(text);
