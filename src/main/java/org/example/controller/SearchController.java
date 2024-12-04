@@ -6,11 +6,10 @@ import kong.unirest.Unirest;
 import org.example.dto.request.SearchRequest;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -21,14 +20,18 @@ import java.util.regex.Pattern;
 @CrossOrigin("*")
 public class SearchController {
 
+    private static final Logger log = LoggerFactory.getLogger(SearchController.class);
     @Value("${google.api.key}")
     private String apiKey;
 
     @Value("${google.api.cx}")
     private String cx;
 
-    @GetMapping("/search")
+    @PostMapping("/search")
     public List<Map<String, Object>> search(@RequestBody SearchRequest searchRequest) {
+
+        log.info("search request dto: {}", searchRequest);
+        System.out.println(searchRequest.toString());
 
         StringBuilder queryBuilder = new StringBuilder(searchRequest.getOccupation());
         if (searchRequest.getCity() != null) queryBuilder.append(" in ").append(searchRequest.getCity());
@@ -55,7 +58,6 @@ public class SearchController {
                 String link = item.getString("link");
 
                 Set<String> emails = scrapeEmails(link);
-
 
                 Map<String, Object> result = new HashMap<>();
                 result.put("title", title);
