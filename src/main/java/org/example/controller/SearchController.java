@@ -3,14 +3,13 @@ package org.example.controller;
 import kong.unirest.HttpResponse;
 import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
-import org.example.dto.response.SearchResult;
-import org.example.dto.response.request.SearchRequest;
+import org.example.dto.request.SearchRequest;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -18,23 +17,30 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @RestController
+@CrossOrigin("*")
 public class SearchController {
 
+    private static final Logger log = LoggerFactory.getLogger(SearchController.class);
     @Value("${google.api.key}")
     private String apiKey;
 
     @Value("${google.api.cx}")
     private String cx;
 
-    @GetMapping("/search")
-    public List<SearchResult> search(@RequestBody SearchRequest searchRequest) {
+    @PostMapping("/search")
+    public List<Map<String, Object>> search(@RequestBody SearchRequest searchRequest) {
+
+        log.info("search request dto: {}", searchRequest);
+        System.out.println(searchRequest.toString());
 
         StringBuilder queryBuilder = new StringBuilder(searchRequest.getOccupation());
         if (searchRequest.getCity() != null) queryBuilder.append(" in ").append(searchRequest.getCity());
         if (searchRequest.getCountry() != null) queryBuilder.append(" ").append(searchRequest.getCountry());
+        if (searchRequest.getKeyword() != null) queryBuilder.append(" ").append(searchRequest.getKeyword());
+
         String query = queryBuilder.toString();
 
-        List<SearchResult> results = new ArrayList<>();
+        List<Map<String, Object>> results = new ArrayList<>();
         String googleSearchUrl = "https://www.googleapis.com/customsearch/v1";
 
         HttpResponse<JsonNode> response = Unirest.get(googleSearchUrl)
@@ -53,8 +59,12 @@ public class SearchController {
 
                 Set<String> emails = scrapeEmails(link);
 
+                Map<String, Object> result = new HashMap<>();
+                result.put("title", title);
+                result.put("url", link);
+                result.put("emails", new ArrayList<>(emails)); // Convert Set to List
 
-                results.add(new SearchResult(title, link, emails));
+                results.add(result);
             }
         }
 
