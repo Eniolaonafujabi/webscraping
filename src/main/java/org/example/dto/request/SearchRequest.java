@@ -1,4 +1,4 @@
-package org.example.dto.response.request;
+package org.example.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,4 +9,5 @@ public class SearchRequest {
     private String occupation;
     private String city;
     private String country;
+    private String keyword;
 }
